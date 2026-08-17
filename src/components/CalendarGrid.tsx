@@ -20,24 +20,22 @@ export default function CalendarGrid({ cursor, buckets, overdueCount, onOpen }: 
   const empty: DayBucket = { entries: [], revisions: [] }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <div className="grid grid-cols-7 gap-2 px-0.5">
+    <div key={days[0].key} className="animate-page-turn flex min-h-0 flex-1 flex-col gap-2">
+      <div className="grid grid-cols-7 gap-1.5 border-b border-line-soft pb-1 sm:gap-2">
         {WEEKDAYS.map((w) => (
-          <div
-            key={w}
-            className="text-center text-[11px] font-bold uppercase tracking-[0.14em] text-ink-faint"
-          >
+          <div key={w} className="text-center font-display text-xl text-ink-soft">
             <span className="hidden sm:inline">{w}</span>
             <span className="sm:hidden">{w[0]}</span>
           </div>
         ))}
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-7 grid-rows-6 gap-2">
-        {days.map((day) => (
+      <div className="grid min-h-0 flex-1 grid-cols-7 grid-rows-6 gap-1.5 sm:gap-2">
+        {days.map((day, i) => (
           <DayCell
             key={day.key}
             day={day}
+            index={i}
             isToday={day.key === today}
             isPast={day.key < today}
             entries={(buckets.get(day.key) ?? empty).entries}

@@ -4,13 +4,15 @@ interface IconProps {
 
 const base = 'h-[1.15em] w-[1.15em]'
 
+/** Thin, round-capped strokes so the icons read as pen marks next to the
+ *  handwriting rather than as UI chrome. */
 function Svg({ className, children }: IconProps & { children: React.ReactNode }) {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.8}
+      strokeWidth={1.6}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
@@ -23,12 +25,12 @@ function Svg({ className, children }: IconProps & { children: React.ReactNode })
 
 export const ChevronLeft = (p: IconProps) => (
   <Svg {...p}>
-    <path d="m15 18-6-6 6-6" />
+    <path d="M15 4.5 8.6 11.6a.6.6 0 0 0 0 .8L15 19.5" />
   </Svg>
 )
 export const ChevronRight = (p: IconProps) => (
   <Svg {...p}>
-    <path d="m9 18 6-6-6-6" />
+    <path d="M9 4.5l6.4 7.1a.6.6 0 0 1 0 .8L9 19.5" />
   </Svg>
 )
 export const Gear = (p: IconProps) => (
@@ -56,32 +58,22 @@ export const Moon = (p: IconProps) => (
 )
 export const Close = (p: IconProps) => (
   <Svg {...p}>
-    <path d="M18 6 6 18M6 6l12 12" />
+    <path d="M18.2 5.6 5.8 18.3M5.7 5.7l12.6 12.6" />
   </Svg>
 )
 export const Plus = (p: IconProps) => (
   <Svg {...p}>
-    <path d="M12 5v14M5 12h14" />
+    <path d="M12 5.2v13.6M5.2 12h13.6" />
   </Svg>
 )
 export const Trash = (p: IconProps) => (
   <Svg {...p}>
-    <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+    <path d="M3.6 6.2h16.8M8 6V4h8v2M18.8 6.2 17.8 20H6.2L5.2 6.2" />
   </Svg>
 )
 export const Check = (p: IconProps) => (
   <Svg {...p}>
-    <path d="m20 6-11 11-5-5" />
-  </Svg>
-)
-export const Download = (p: IconProps) => (
-  <Svg {...p}>
-    <path d="M12 3v12M7 11l5 5 5-5M4 21h16" />
-  </Svg>
-)
-export const Upload = (p: IconProps) => (
-  <Svg {...p}>
-    <path d="M12 17V5M7 9l5-5 5 5M4 21h16" />
+    <path d="M4.2 12.6 8.8 17.6 20 5.8" />
   </Svg>
 )
 export const Pencil = (p: IconProps) => (
@@ -107,5 +99,49 @@ export const Alert = (p: IconProps) => (
   <Svg {...p}>
     <path d="M12 9v4M12 17h.01" />
     <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+  </Svg>
+)
+
+/** A quill, for the "what I studied" heading. */
+export const Quill = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M3.5 20.5c4-1 6.2-2.6 8-4.8" />
+    <path d="M20.5 3.5c-9 .8-13.4 5.2-13.9 10.4-.1 1.3.3 2.4 1 3.2 4.6-.4 8.6-3.4 10.5-7.6" />
+    <path d="M8.2 15.8c2.8-.6 5-2 6.4-4" />
+  </Svg>
+)
+
+/** A hand-drawn flourish used to close off a heading. */
+export const Flourish = ({ className }: IconProps) => (
+  <svg
+    viewBox="0 0 220 14"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.4}
+    strokeLinecap="round"
+    aria-hidden="true"
+    className={className}
+    preserveAspectRatio="none"
+  >
+    <path d="M2 8c26-6 52 4 78-1 26-5 50 6 76 1 20-4 32-2 42 1" opacity="0.75" />
+    <path d="M96 12c8-3 16-3 24 0" opacity="0.45" />
+  </svg>
+)
+
+/** Closing the diary and putting it away. */
+export const SignOut = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M14 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8" />
+    <path d="M17 15.5 20.5 12 17 8.5" />
+    <path d="M20 12H9.5" />
+  </Svg>
+)
+
+/** Little pressed-flower asterisk for empty states. */
+export const Sprig = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 3.5v17" />
+    <path d="M12 9c-2.6-2.6-5-3-6.5-2.6C5.8 8.2 8 11 12 11" />
+    <path d="M12 13c2.6-2.6 5-3 6.5-2.6C18.2 12.2 16 15 12 15" />
   </Svg>
 )

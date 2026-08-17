@@ -1,9 +1,10 @@
 import type { Entry, Revision } from '../db/schema'
-import { subjectColor } from '../lib/colors'
+import { subjectPen } from '../lib/colors'
 import type { GridDay } from '../lib/dates'
 
 interface Props {
   day: GridDay
+  index: number
   isToday: boolean
   isPast: boolean
   entries: Entry[]
@@ -14,6 +15,7 @@ interface Props {
 
 export default function DayCell({
   day,
+  index,
   isToday,
   isPast,
   entries,
@@ -34,75 +36,66 @@ export default function DayCell({
       onClick={() => onOpen(day.key)}
       aria-label={label}
       className={[
-        'group relative flex min-h-0 cursor-pointer flex-col gap-1.5 overflow-hidden rounded-xl border p-2 text-left transition',
-        'hover:-translate-y-0.5 hover:shadow-card focus-visible:-translate-y-0.5',
+        'group relative flex min-h-0 cursor-pointer flex-col gap-1 overflow-hidden p-1.5 text-left transition sm:p-2',
+        index % 2 ? 'hand-edge' : 'hand-edge-alt',
+        'hover:-translate-y-0.5 hover:-rotate-[0.5deg] hover:shadow-card focus-visible:-translate-y-0.5',
         day.inMonth
-          ? 'border-line-soft bg-surface'
-          : 'border-transparent bg-surface/35 text-ink-faint',
-        isToday ? 'ring-2 ring-today ring-offset-2 ring-offset-bg' : '',
+          ? 'border border-line-soft bg-surface-2/40 hover:bg-surface-2/70'
+          : 'border border-transparent opacity-45',
+        isPast && day.inMonth ? 'opacity-80' : '',
       ].join(' ')}
     >
       <div className="flex items-start justify-between gap-1">
         <span
           className={[
-            'flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-sm font-semibold tabular-nums',
-            isToday
-              ? 'bg-today text-bg-deep'
-              : day.inMonth
-                ? isPast
-                  ? 'text-ink-soft'
-                  : 'text-ink'
-                : 'text-ink-faint',
+            'font-display text-xl leading-none',
+            isToday ? 'ringed ml-1 mt-1 text-today' : '',
+            !isToday && day.inMonth ? 'text-ink' : '',
+            !day.inMonth ? 'text-ink-faint' : '',
           ].join(' ')}
         >
           {day.dayOfMonth}
         </span>
 
-        <div className="flex flex-wrap items-center justify-end gap-1">
+        <span className="flex flex-col items-end gap-0.5 pt-0.5 text-right leading-tight">
           {overdue > 0 && (
-            <span className="rounded-full bg-danger-soft px-1.5 py-0.5 text-[10px] font-bold text-danger">
-              {overdue} late
-            </span>
+            <span className="text-xs text-danger">{overdue} late</span>
           )}
           {pending.length > 0 && (
-            <span className="rounded-full bg-accent-soft px-1.5 py-0.5 text-[10px] font-bold text-accent-ink">
-              {pending.length} revise
+            <span className="text-xs text-accent">
+              {pending.length} to revise
             </span>
           )}
           {done.length > 0 && pending.length === 0 && (
-            <span className="rounded-full bg-done-soft px-1.5 py-0.5 text-[10px] font-bold text-done">
-              done
-            </span>
+            <span className="text-xs text-done">revised ✓</span>
           )}
-        </div>
+        </span>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
-        {shown.map((e) => {
-          const c = subjectColor(e.subject)
-          return (
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        {shown.map((e) => (
+          <span
+            key={e.id}
+            className="flex items-center gap-1.5 truncate text-xs leading-[1.3] text-ink-soft"
+            title={`${e.subject ? e.subject + ' — ' : ''}${e.topic}`}
+          >
             <span
-              key={e.id}
-              className="flex items-center gap-1.5 truncate rounded-md px-1.5 py-0.5 text-[11px] font-medium"
-              style={{ background: c.chipBg, color: c.chipInk }}
-              title={`${e.subject ? e.subject + ' — ' : ''}${e.topic}`}
-            >
-              <span
-                className="h-1.5 w-1.5 shrink-0 rounded-full"
-                style={{ background: c.dot }}
-              />
-              <span className="truncate">{e.topic}</span>
-            </span>
-          )
-        })}
+              className="h-1.5 w-1.5 shrink-0 rounded-full"
+              style={{ background: subjectPen(e.subject) }}
+            />
+            <span className="truncate">{e.topic}</span>
+          </span>
+        ))}
         {extra > 0 && (
-          <span className="px-1.5 text-[10px] font-semibold text-ink-faint">+{extra} more</span>
+          <span className="pl-3 text-xs leading-[1.3] text-ink-faint">
+            …and {extra} more
+          </span>
         )}
       </div>
 
       {day.inMonth && entries.length === 0 && pending.length === 0 && (
-        <span className="pointer-events-none absolute inset-x-0 bottom-1.5 text-center text-[10px] font-medium text-ink-faint opacity-0 transition group-hover:opacity-100">
-          + add topic
+        <span className="pointer-events-none absolute inset-x-0 bottom-1.5 text-center text-xs text-ink-faint opacity-0 transition group-hover:opacity-100">
+          write something
         </span>
       )}
     </button>

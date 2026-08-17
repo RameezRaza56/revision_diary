@@ -9,13 +9,18 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'fonts/*.woff2'],
+      // The handwriting is the whole point, so the fonts get precached too —
+      // woff2 is not in Workbox's default glob.
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      },
       manifest: {
-        name: 'Revision Calendar',
-        short_name: 'Revision',
-        description: 'Spaced-repetition revision planner',
-        theme_color: '#1e1b31',
-        background_color: '#1e1b31',
+        name: 'My Revision Diary',
+        short_name: 'Diary',
+        description: 'A handwritten diary that remembers when to revise',
+        theme_color: '#cdbb9c',
+        background_color: '#cdbb9c',
         display: 'standalone',
         start_url: '/',
         icons: [

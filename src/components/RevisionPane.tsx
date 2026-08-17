@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import type { Entry, Revision } from '../db/schema'
-import { rescheduleRevision, setRevisionStatus } from '../db/storage'
-import { subjectColor } from '../lib/colors'
-import { addDaysKey, shortDate, daysBetweenKeys, todayKey } from '../lib/dates'
-import { Check, Repeat, Alert } from './Icons'
+import { setRevisionStatus } from '../db/storage'
+import { penStyle } from '../lib/colors'
+import { shortDate, daysBetweenKeys, todayKey } from '../lib/dates'
+import { Check, Sprig } from './Icons'
 
 interface Props {
   dueToday: Revision[]
@@ -20,13 +20,13 @@ export default function RevisionPane({ dueToday, overdue, entries, totals, isTod
   const nothing = pending.length + settled.length + overdue.length === 0
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-5">
       {isToday && overdue.length > 0 && (
         <Section
-          title="Overdue"
+          title="Slipped past me"
           tone="danger"
           count={overdue.length}
-          hint="Carried over from earlier days — tick them off whenever you catch up."
+          hint="carried over from earlier pages — tick them off whenever you catch up"
         >
           {overdue.map((r) => (
             <RevisionRow
@@ -41,7 +41,11 @@ export default function RevisionPane({ dueToday, overdue, entries, totals, isTod
       )}
 
       {pending.length > 0 && (
-        <Section title={isToday ? 'Due today' : 'Due this day'} tone="accent" count={pending.length}>
+        <Section
+          title={isToday ? 'For today' : 'For this day'}
+          tone="accent"
+          count={pending.length}
+        >
           {pending.map((r) => (
             <RevisionRow
               key={r.id}
@@ -54,7 +58,7 @@ export default function RevisionPane({ dueToday, overdue, entries, totals, isTod
       )}
 
       {settled.length > 0 && (
-        <Section title="Finished" tone="done" count={settled.length}>
+        <Section title="Done and dusted" tone="done" count={settled.length}>
           {settled.map((r) => (
             <RevisionRow
               key={r.id}
@@ -67,11 +71,11 @@ export default function RevisionPane({ dueToday, overdue, entries, totals, isTod
       )}
 
       {nothing && (
-        <div className="rounded-2xl border border-dashed border-line bg-surface-2/40 px-4 py-10 text-center">
-          <Repeat className="mx-auto mb-2 h-7 w-7 text-ink-faint" />
-          <p className="text-sm font-medium text-ink-soft">Nothing to revise on this day.</p>
-          <p className="mt-1 text-xs text-ink-faint">
-            Add a topic on the left and its revisions will appear here automatically.
+        <div className="px-4 py-10 text-center">
+          <Sprig className="mx-auto mb-1 h-8 w-8 text-ink-faint opacity-60" />
+          <p className="font-display text-xl text-ink-soft">Nothing to revisit today.</p>
+          <p className="mt-0.5 text-base text-ink-faint">
+            Write a topic on the other page and it will find its way here.
           </p>
         </div>
       )}
@@ -82,9 +86,9 @@ export default function RevisionPane({ dueToday, overdue, entries, totals, isTod
 /* ------------------------------------------------------------------ section */
 
 const TONES = {
-  danger: 'bg-danger-soft text-danger',
-  accent: 'bg-accent-soft text-accent-ink',
-  done: 'bg-done-soft text-done',
+  danger: 'text-danger',
+  accent: 'text-accent',
+  done: 'text-done',
 } as const
 
 function Section({
@@ -102,15 +106,12 @@ function Section({
 }) {
   return (
     <section className="grid gap-2">
-      <div className="flex items-center gap-2">
-        {tone === 'danger' && <Alert className="h-4 w-4 text-danger" />}
-        <h4 className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink-soft">{title}</h4>
-        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${TONES[tone]}`}>
-          {count}
-        </span>
+      <div className="flex items-baseline gap-2">
+        <h4 className={`font-display text-xl ${TONES[tone]}`}>{title}</h4>
+        <span className="text-base text-ink-faint">({count})</span>
       </div>
-      {hint && <p className="-mt-1 text-xs text-ink-faint">{hint}</p>}
-      <div className="grid gap-2">{children}</div>
+      {hint && <p className="-mt-1.5 text-sm text-ink-faint">{hint}</p>}
+      <div className="grid gap-2.5">{children}</div>
     </section>
   )
 }
@@ -131,134 +132,96 @@ function RevisionRow({
   const [rating, setRating] = useState(false)
   if (!entry) return null
 
-  const c = subjectColor(entry.subject)
   const isDone = revision.status === 'done'
   const isSkipped = revision.status === 'skipped'
   const lateBy = overdue ? daysBetweenKeys(revision.dueDate, todayKey()) : 0
 
   async function complete(confidence: number | null) {
-    await setRevisionStatus(revision.id, 'done', confidence)
+    await setRevisionStatus(revision, 'done', confidence)
     setRating(false)
   }
 
   return (
-    <div
-      className={[
-        'rounded-xl border p-2.5 transition',
-        isDone
-          ? 'border-line-soft bg-done-soft/40'
-          : overdue
-            ? 'border-danger/40 bg-danger-soft/30'
-            : 'border-line-soft bg-surface',
-        isSkipped ? 'opacity-60' : '',
-      ].join(' ')}
-    >
-      <div className="flex items-start gap-2.5">
-        <button
-          type="button"
-          onClick={() => (isDone ? setRevisionStatus(revision.id, 'pending') : setRating(true))}
-          aria-label={isDone ? 'Mark as not revised' : 'Mark as revised'}
-          className={[
-            'mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border-2 transition',
-            isDone ? 'border-done bg-done text-white' : 'border-line hover:border-accent',
-          ].join(' ')}
+    <div className={`flex items-start gap-2.5 ${isSkipped ? 'opacity-55' : ''}`}>
+      <button
+        type="button"
+        onClick={() => (isDone ? setRevisionStatus(revision, 'pending') : setRating(true))}
+        aria-label={isDone ? 'Mark as not revised' : 'Mark as revised'}
+        className={[
+          'hand-edge mt-1 grid h-5 w-5 shrink-0 place-items-center border-[1.5px] transition',
+          isDone
+            ? 'border-done text-done'
+            : 'border-ink-faint text-transparent hover:-rotate-6 hover:border-accent',
+        ].join(' ')}
+      >
+        <Check className="h-4 w-4" />
+      </button>
+
+      <div className="min-w-0 flex-1">
+        <p
+          className={`text-lg leading-snug ${
+            isDone ? 'text-ink-faint line-through decoration-done decoration-2' : 'text-ink'
+          }`}
         >
-          {isDone && <Check className="h-3.5 w-3.5" />}
-        </button>
+          {entry.topic}
+        </p>
 
-        <div className="min-w-0 flex-1">
-          <p
-            className={`truncate text-sm font-semibold ${isDone ? 'text-ink-soft line-through' : 'text-ink'}`}
-          >
-            {entry.topic}
-          </p>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-ink-faint">
-            {entry.subject && (
-              <span
-                className="rounded px-1.5 py-0.5 font-semibold"
-                style={{ background: c.chipBg, color: c.chipInk }}
-              >
-                {entry.subject}
-              </span>
-            )}
-            <span>
-              Revision {revision.index}
-              {total ? ` of ${total}` : ''}
+        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-faint">
+          {entry.subject && (
+            <span
+              className="hand-pill border px-1.5 py-px"
+              style={penStyle(entry.subject)}
+            >
+              {entry.subject}
             </span>
-            <span aria-hidden>·</span>
-            <span>studied {shortDate(entry.studyDate)}</span>
-            {overdue && (
-              <span className="font-semibold text-danger">
-                · {lateBy} day{lateBy === 1 ? '' : 's'} late
-              </span>
-            )}
-            {isSkipped && <span className="font-semibold">· skipped</span>}
-          </div>
-
-          {entry.notes && !isDone && (
-            <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-ink-soft">
-              {entry.notes}
-            </p>
           )}
-
-          {rating && (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5 rounded-lg bg-surface-2 p-2">
-              <span className="mr-1 text-[11px] font-semibold text-ink-soft">
-                How well did it stick?
-              </span>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => complete(n)}
-                  className="h-6 w-6 rounded-md border border-line text-xs font-bold text-ink-soft transition hover:border-accent hover:bg-accent hover:text-white"
-                >
-                  {n}
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => complete(null)}
-                className="ml-1 text-[11px] font-medium text-ink-faint underline underline-offset-2 hover:text-ink"
-              >
-                skip rating
-              </button>
-            </div>
+          <span>
+            revision {revision.index}
+            {total ? ` of ${total}` : ''}
+          </span>
+          <span aria-hidden>·</span>
+          <span>studied {shortDate(entry.studyDate)}</span>
+          {overdue && (
+            <span className="text-danger">
+              · {lateBy} day{lateBy === 1 ? '' : 's'} late
+            </span>
           )}
-
-          {!isDone && !rating && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              <SmallButton onClick={() => rescheduleRevision(revision.id, addDaysKey(todayKey(), 1))}>
-                Tomorrow
-              </SmallButton>
-              <SmallButton onClick={() => rescheduleRevision(revision.id, addDaysKey(todayKey(), 3))}>
-                +3 days
-              </SmallButton>
-              <SmallButton onClick={() => setRevisionStatus(revision.id, 'skipped')}>
-                Skip
-              </SmallButton>
-            </div>
-          )}
-
-          {isDone && revision.confidence != null && (
-            <p className="mt-1.5 text-[11px] font-medium text-done">
-              Confidence {revision.confidence}/5
-            </p>
-          )}
+          {isSkipped && <span>· skipped</span>}
         </div>
+
+        {entry.notes && !isDone && (
+          <p className="mt-1 line-clamp-2 text-base leading-relaxed text-ink-soft">{entry.notes}</p>
+        )}
+
+        {rating && (
+          <div className="hand-edge mt-1.5 flex flex-wrap items-center gap-1.5 border border-line-soft bg-surface-2/60 px-2.5 py-1.5">
+            <span className="text-base text-ink-soft">how well did it stick?</span>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => complete(n)}
+                className="h-7 w-7 rounded-full border border-line text-base text-ink-soft transition hover:-rotate-6 hover:border-accent hover:bg-accent hover:text-surface"
+              >
+                {n}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => complete(null)}
+              className="ml-1 text-sm text-ink-faint transition hover:text-ink"
+            >
+              just tick it
+            </button>
+          </div>
+        )}
+
+        {isDone && revision.confidence != null && (
+          <p className="mt-0.5 text-sm text-done">
+            felt {revision.confidence} out of 5
+          </p>
+        )}
       </div>
     </div>
-  )
-}
-
-function SmallButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="rounded-md border border-line px-2 py-1 text-[11px] font-medium text-ink-soft transition hover:border-accent hover:text-ink"
-    >
-      {children}
-    </button>
   )
 }
