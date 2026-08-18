@@ -92,7 +92,7 @@ export default function DayModal({ dateKey, onGoTo, onClose }: Props) {
         <div className="ribbon right-5 top-0 z-10" aria-hidden />
 
         {/* ------------------------------------------------------- page head */}
-        <header className="relative flex items-start justify-between gap-3 border-b border-line-soft px-5 py-3 sm:px-8 sm:py-4">
+        <header className="relative flex shrink-0 items-start justify-between gap-3 border-b border-line-soft px-5 py-3 sm:px-8 sm:py-4">
           <div className="min-w-0">
             <p className="text-sm text-ink-faint">{isToday ? 'Today’s page' : 'From my diary'}</p>
             <div className="flex items-baseline gap-1.5">
@@ -126,7 +126,7 @@ export default function DayModal({ dateKey, onGoTo, onClose }: Props) {
         </header>
 
         {/* tab switcher — only needed when the two pages can't sit side by side */}
-        <div className="flex gap-2 border-b border-line-soft px-4 py-2 lg:hidden">
+        <div className="flex shrink-0 gap-2 border-b border-line-soft px-4 py-2 lg:hidden">
           <TabButton active={tab === 'entries'} onClick={() => setTab('entries')}>
             <Quill className="h-4 w-4" /> Studied ({data.entries.length})
           </TabButton>

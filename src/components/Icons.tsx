@@ -128,6 +128,14 @@ export const Flourish = ({ className }: IconProps) => (
   </svg>
 )
 
+/** Whoever is signed in. */
+export const Person = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" />
+  </Svg>
+)
+
 /** Fetch anything new and start the page again. */
 export const Refresh = (p: IconProps) => (
   <Svg {...p}>

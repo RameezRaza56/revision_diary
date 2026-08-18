@@ -1,19 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { addMonths } from 'date-fns'
-import { signOut } from 'firebase/auth'
-import { auth, firebaseConfigured } from './lib/firebase'
+import { firebaseConfigured } from './lib/firebase'
 import { useDiary } from './db/DiaryContext'
 import { saveTheme } from './db/storage'
 import { describeInterval, fromKey, monthBounds, prettyDate, todayKey } from './lib/dates'
 import { entriesBetween, overdueRevisions, revisionsBetween } from './lib/select'
-import { applyTheme, forgetTheme, rememberTheme, SIGNED_OUT_THEME } from './lib/theme'
+import { applyTheme, rememberTheme, SIGNED_OUT_THEME } from './lib/theme'
+import { applyAppearance, DEFAULT_FONT, DEFAULT_TEXT_SIZE } from './lib/fonts'
 import CalendarGrid, { type DayBucket } from './components/CalendarGrid'
 import DayModal from './components/DayModal'
 import SettingsPanel from './components/SettingsPanel'
 import SearchOverlay from './components/SearchOverlay'
 import SignIn from './components/SignIn'
+import ProfilePanel from './components/ProfilePanel'
 import Toolbar from './components/Toolbar'
-import { Refresh, SignOut } from './components/Icons'
+import { Refresh } from './components/Icons'
 
 export default function App() {
   const { user, authReady, loading, entries, revisions, settings, sync } = useDiary()
@@ -22,6 +23,7 @@ export default function App() {
   const [openDay, setOpenDay] = useState<string | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
 
   /* --------------------------------------------------------------- theme */
 
@@ -35,6 +37,11 @@ export default function App() {
     // would make the next cold launch flash the wrong theme.
     if (user && !loading) rememberTheme(theme)
   }, [theme, user, loading])
+
+  useEffect(() => {
+    if (user) applyAppearance(settings.font, settings.textSize)
+    else applyAppearance(DEFAULT_FONT, DEFAULT_TEXT_SIZE)
+  }, [user, settings.font, settings.textSize])
 
   const toggleTheme = useCallback(() => {
     saveTheme(settings, settings.theme === 'dark' ? 'light' : 'dark')
@@ -130,6 +137,8 @@ export default function App() {
           onOpenSearch={() => setShowSearch(true)}
           theme={settings.theme}
           onToggleTheme={toggleTheme}
+          onOpenProfile={() => setShowProfile(true)}
+          username={settings.username}
           scheduleSummary={scheduleSummary}
         />
 
@@ -162,35 +171,16 @@ export default function App() {
           onOpen={setOpenDay}
         />
 
-        <footer className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-sm text-ink-faint">
+        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 text-sm text-ink-faint">
           <span>
             {entries.length === 0
               ? 'no entries yet'
               : `${entries.length} topic${entries.length === 1 ? '' : 's'} written in this diary`}
             <SyncNote offline={sync.offline} pending={sync.pending} />
           </span>
-          <span className="flex items-center gap-2">
-            <span className="hidden sm:inline">{user.email}</span>
-            <button
-              type="button"
-              onClick={refresh}
-              title="Check for a new version and reload"
-              className="flex items-center gap-1 transition hover:text-accent"
-            >
-              <Refresh className="h-4 w-4" /> refresh
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                forgetTheme()
-                signOut(auth)
-              }}
-              title="Close the diary on this device"
-              className="flex items-center gap-1 transition hover:text-accent"
-            >
-              <SignOut className="h-4 w-4" /> sign out
-            </button>
-          </span>
+          <button type="button" onClick={refresh} className="btn-ink text-sm">
+            <Refresh className="h-4 w-4" /> Refresh
+          </button>
         </footer>
       </main>
 
@@ -206,6 +196,8 @@ export default function App() {
         />
       )}
       {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+      {showProfile && <ProfilePanel onClose={() => setShowProfile(false)} />}
+
       {showSearch && (
         <SearchOverlay
           onPick={(key) => {

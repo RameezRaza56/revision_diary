@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDocs,
   setDoc,
   writeBatch,
   type Firestore,
@@ -153,11 +154,59 @@ export async function saveSettings(
   batched(ops)
 }
 
+/** Theme, font and text size all live in the same settings document. */
+export async function saveAppearance(
+  settings: Settings,
+  patch: Partial<Pick<Settings, 'theme' | 'font' | 'textSize'>>,
+): Promise<void> {
+  setDoc(settingsDoc(db, uid()), { ...settings, ...patch }).catch((err) =>
+    console.error('Sync write failed:', err),
+  )
+}
+
+/** The first write for a brand-new account: her defaults, plus the name she
+ *  chose at sign-up so the app has something to show straight away. */
+export async function createSettings(username: string | null): Promise<void> {
+  await setDoc(settingsDoc(db, uid()), { ...DEFAULT_SETTINGS, username })
+}
+
+/** Mirror the claimed name onto her settings so the app can show it. */
+export async function saveUsername(settings: Settings, username: string | null): Promise<void> {
+  await setDoc(settingsDoc(db, uid()), { ...settings, username })
+}
+
 export async function saveTheme(settings: Settings, theme: Settings['theme']): Promise<void> {
   const userId = uid()
   setDoc(settingsDoc(db, userId), { ...settings, theme }).catch((err) =>
     console.error('Sync write failed:', err),
   )
+}
+
+/**
+ * Wipe the whole diary. Called before deleting the account itself: once the
+ * Firebase user is gone there is no longer permission to reach these
+ * documents, and they would sit there orphaned for ever.
+ *
+ * Unlike every other write here this one *is* awaited — the account deletion
+ * that follows must not race it.
+ */
+export async function deleteEverything(): Promise<void> {
+  const userId = uid()
+  const [entrySnap, revisionSnap] = await Promise.all([
+    getDocs(entriesCol(db, userId)),
+    getDocs(revisionsCol(db, userId)),
+  ])
+
+  const refs = [
+    ...entrySnap.docs.map((d) => d.ref),
+    ...revisionSnap.docs.map((d) => d.ref),
+    settingsDoc(db, userId),
+  ]
+  for (let i = 0; i < refs.length; i += 450) {
+    const batch = writeBatch(db)
+    refs.slice(i, i + 450).forEach((ref) => batch.delete(ref))
+    await batch.commit()
+  }
 }
 
 /* --------------------------------------------------------------- migration */

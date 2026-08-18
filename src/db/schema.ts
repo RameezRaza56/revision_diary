@@ -1,3 +1,5 @@
+import { DEFAULT_FONT, DEFAULT_TEXT_SIZE } from '../lib/fonts'
+
 /** A topic she studied on a given day. Dates are 'yyyy-MM-dd' strings — never Date
  *  objects — so nothing shifts when the clock crosses a timezone or DST boundary. */
 export interface Entry {
@@ -34,6 +36,16 @@ export interface Settings {
   anchor: Anchor
   skipWeekends: boolean
   theme: 'light' | 'dark'
+  /** id from lib/fonts.ts */
+  font: string
+  /** id from TEXT_SIZES in lib/fonts.ts */
+  textSize: string
+  /**
+   * Her own copy of the username, for display. The `usernames` collection is
+   * the authority on who holds what, but it is keyed by name and cannot be
+   * queried by uid, so the answer to "what is mine?" is mirrored here.
+   */
+  username: string | null
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -43,4 +55,7 @@ export const DEFAULT_SETTINGS: Settings = {
   skipWeekends: false,
   // Matches the sign-in page, so a new account doesn't flip theme on arrival.
   theme: 'dark',
+  font: DEFAULT_FONT,
+  textSize: DEFAULT_TEXT_SIZE,
+  username: null,
 }

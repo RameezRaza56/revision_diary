@@ -1,15 +1,33 @@
 rules_version = '2';
 
-// The whole security model in one rule: a diary lives under the uid of the
-// person who wrote it, and only that person, signed in, can read or write it.
-// Nothing is world-readable and there are no shared collections.
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // A diary lives under the uid of the person who wrote it, and only that
+    // person, signed in, can read or write it.
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Anything not matched above is denied by default.
+    // Username reservations. One document per name, the id *is* the name, so
+    // uniqueness is structural: `create` only matches when the document does
+    // not exist yet, and two people cannot both create the same id.
+    match /usernames/{name} {
+      // `get` is open because the sign-in box must turn a username into an
+      // email before anyone is authenticated. `list` stays shut, so the
+      // collection cannot be enumerated — you have to know the exact name.
+      allow get: if true;
+      allow list: if false;
+
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.email == request.auth.token.email
+                    && name.size() >= 3 && name.size() <= 20
+                    && name.matches('^[a-z0-9._]+$');
+
+      // Only the holder may give one up. No updates: change means release
+      // the old one and create the new, so a name is never silently rewritten.
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
   }
 }

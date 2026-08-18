@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { ChevronLeft, ChevronRight, Flourish, Gear, Moon, Search, Sun } from './Icons'
+import { ChevronLeft, ChevronRight, Flourish, Gear, Moon, Person, Search, Sun } from './Icons'
 
 interface Props {
   cursor: Date
@@ -9,6 +9,8 @@ interface Props {
   onOpenSearch: () => void
   theme: 'light' | 'dark'
   onToggleTheme: () => void
+  onOpenProfile: () => void
+  username: string | null
   scheduleSummary: string
 }
 
@@ -20,6 +22,8 @@ export default function Toolbar({
   onOpenSearch,
   theme,
   onToggleTheme,
+  onOpenProfile,
+  username,
   scheduleSummary,
 }: Props) {
   return (
@@ -65,9 +69,18 @@ export default function Toolbar({
             <Moon className="h-[1.15rem] w-[1.15rem]" />
           )}
         </PenButton>
-        <PenButton label="Revision pattern" onClick={onOpenSettings}>
+        <PenButton label="Settings" onClick={onOpenSettings}>
           <Gear className="h-[1.15rem] w-[1.15rem]" />
         </PenButton>
+        <button
+          type="button"
+          onClick={onOpenProfile}
+          title="Your profile"
+          className="hand-pill flex shrink-0 items-center gap-1.5 border border-line-soft px-2.5 py-1.5 text-ink-soft transition hover:-rotate-2 hover:border-accent hover:text-accent"
+        >
+          <Person className="h-[1.15rem] w-[1.15rem]" />
+          {username && <span className="hidden text-base sm:inline">@{username}</span>}
+        </button>
       </div>
     </header>
   )
