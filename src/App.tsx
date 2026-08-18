@@ -13,7 +13,7 @@ import SettingsPanel from './components/SettingsPanel'
 import SearchOverlay from './components/SearchOverlay'
 import SignIn from './components/SignIn'
 import Toolbar from './components/Toolbar'
-import { SignOut } from './components/Icons'
+import { Refresh, SignOut } from './components/Icons'
 
 export default function App() {
   const { user, authReady, loading, entries, revisions, settings, sync } = useDiary()
@@ -39,6 +39,21 @@ export default function App() {
   const toggleTheme = useCallback(() => {
     saveTheme(settings, settings.theme === 'dark' ? 'light' : 'dark')
   }, [settings])
+
+  /**
+   * An installed app has no address bar, so there is no browser reload button
+   * and, on iOS, no pull-to-refresh either. This is the way out of anything
+   * that looks stuck, and it asks for a new version on the way past.
+   */
+  async function refresh() {
+    try {
+      const registration = await navigator.serviceWorker?.getRegistration()
+      await registration?.update()
+    } catch {
+      // offline, or no service worker — reloading is still the right move
+    }
+    window.location.reload()
+  }
 
   /* ------------------------------------------------------------ shortcuts */
 
@@ -156,6 +171,14 @@ export default function App() {
           </span>
           <span className="flex items-center gap-2">
             <span className="hidden sm:inline">{user.email}</span>
+            <button
+              type="button"
+              onClick={refresh}
+              title="Check for a new version and reload"
+              className="flex items-center gap-1 transition hover:text-accent"
+            >
+              <Refresh className="h-4 w-4" /> refresh
+            </button>
             <button
               type="button"
               onClick={() => {

@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'fonts/*.woff2'],
       // The handwriting is the whole point, so the fonts get precached too —
       // woff2 is not in Workbox's default glob.

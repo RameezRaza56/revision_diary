@@ -128,6 +128,14 @@ export const Flourish = ({ className }: IconProps) => (
   </svg>
 )
 
+/** Fetch anything new and start the page again. */
+export const Refresh = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M20.2 12a8.2 8.2 0 1 1-2.4-5.8" />
+    <path d="M20.4 4.4V10h-5.6" />
+  </Svg>
+)
+
 /** Closing the diary and putting it away. */
 export const SignOut = (p: IconProps) => (
   <Svg {...p}>
