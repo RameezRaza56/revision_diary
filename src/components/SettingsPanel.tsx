@@ -35,6 +35,10 @@ export default function SettingsPanel({ onClose }: Props) {
   const [skipWeekends, setSkipWeekends] = useState(settings.skipWeekends)
   const [applyToExisting, setApplyToExisting] = useState(true)
   const [saving, setSaving] = useState(false)
+  // What she is part-way through typing into one of the interval boxes. The
+  // schedule itself only ever holds valid numbers, so an emptied box needs
+  // somewhere else to live until she finishes.
+  const [draft, setDraft] = useState<{ index: number; text: string } | null>(null)
 
   // The footer promises Esc closes any page — this one included.
   useEffect(() => {
@@ -45,9 +49,27 @@ export default function SettingsPanel({ onClose }: Props) {
 
   const preview = planRevisions(todayKey(), schedule, anchor, skipWeekends)
 
-  function setInterval(i: number, value: number, unit: Unit) {
-    const days = Math.max(1, Math.round(value)) * UNITS[unit]
+  function writeDays(i: number, days: number) {
     setSchedule(schedule.map((d, idx) => (idx === i ? days : d)))
+  }
+
+  /** Every keystroke. Clearing the box is allowed; it just doesn't commit. */
+  function typeAmount(i: number, text: string, unit: Unit) {
+    setDraft({ index: i, text })
+    const n = Number(text)
+    if (text.trim() !== '' && Number.isFinite(n) && n >= 1) {
+      writeDays(i, Math.round(n) * UNITS[unit])
+    }
+  }
+
+  /** On the way out, fall back to the last good value rather than inventing one. */
+  function commitAmount() {
+    setDraft(null)
+  }
+
+  function setUnit(i: number, value: number, unit: Unit) {
+    setDraft(null)
+    writeDays(i, Math.max(1, Math.round(value)) * UNITS[unit])
   }
 
   async function save() {
@@ -131,13 +153,14 @@ export default function SettingsPanel({ onClose }: Props) {
                     <input
                       type="number"
                       min={1}
-                      value={value}
-                      onChange={(e) => setInterval(i, Number(e.target.value), unit)}
+                      value={draft?.index === i ? draft.text : value}
+                      onChange={(e) => typeAmount(i, e.target.value, unit)}
+                      onBlur={commitAmount}
                       className="ink-field w-16 text-center"
                     />
                     <select
                       value={unit}
-                      onChange={(e) => setInterval(i, value, e.target.value as Unit)}
+                      onChange={(e) => setUnit(i, value, e.target.value as Unit)}
                       className="ink-field w-auto cursor-pointer"
                     >
                       {Object.keys(UNITS).map((u) => (
@@ -152,7 +175,10 @@ export default function SettingsPanel({ onClose }: Props) {
                     <button
                       type="button"
                       aria-label={`Remove revision ${i + 1}`}
-                      onClick={() => setSchedule(schedule.filter((_, idx) => idx !== i))}
+                      onClick={() => {
+                        setDraft(null)
+                        setSchedule(schedule.filter((_, idx) => idx !== i))
+                      }}
                       className="ml-auto grid h-8 w-8 place-items-center rounded-full text-ink-faint transition hover:-rotate-6 hover:text-danger"
                     >
                       <Trash className="h-4 w-4" />
@@ -163,9 +189,10 @@ export default function SettingsPanel({ onClose }: Props) {
             </div>
             <button
               type="button"
-              onClick={() =>
+              onClick={() => {
+                setDraft(null)
                 setSchedule([...schedule, (schedule[schedule.length - 1] ?? 7) * 2 || 7])
-              }
+              }}
               className="btn-ink mt-1 justify-self-start border-dashed text-base"
             >
               <Plus className="h-4 w-4" /> one more time
