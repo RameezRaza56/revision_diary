@@ -6,54 +6,30 @@
    Self-hosted (OFL) so the diary still looks like itself with no network —
    the app is meant to work offline once installed.
 
-   Patrick Hand = everything you actually read: a printed hand, not a cursive
-   one, so notes and dates stay legible at small sizes.
-   Caveat = the flourish, kept for large headings only. */
+   Playfair Display, one variable file covering 400–900. Headings take the
+   heavier end of the axis; small print takes 500, because Playfair's hairlines
+   thin out badly below about 15px at weight 400. */
 
 @font-face {
-  font-family: 'Patrick Hand';
+  font-family: 'Playfair Display';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 400 900;
   font-display: swap;
-  src: url('/fonts/patrickhand-latin.woff2') format('woff2');
+  src: url('/fonts/playfair-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: 'Patrick Hand';
+  font-family: 'Playfair Display';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 400 900;
   font-display: swap;
-  src: url('/fonts/patrickhand-latin-ext.woff2') format('woff2');
+  src: url('/fonts/playfair-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
     U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
     U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-@font-face {
-  font-family: 'Caveat';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('/fonts/caveat-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: 'Caveat';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('/fonts/caveat-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
-    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
-    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-
-/* --------------------------------------------------------------------- paper
-   Day  = warm cream paper, faint blue rules, rose margin, blue-black ink.
-   Night = the same diary read by lamplight: dusky page, cream ink. */
 
 :root {
   --desk: #cdbb9c;
@@ -153,29 +129,31 @@
   --shadow-float: var(--shadow-lg);
   --shadow-book: var(--shadow-book);
 
-  --font-hand: 'Patrick Hand', 'Segoe Print', 'Comic Sans MS', cursive;
-  --font-display: 'Caveat', 'Segoe Script', 'Bradley Hand', cursive;
+  --font-body: 'Playfair Display', 'Iowan Old Style', Georgia, serif;
+  --font-display: 'Playfair Display', 'Iowan Old Style', Georgia, serif;
 
   /* Two faces with very different proportions share this scale: Patrick Hand
      has a generous x-height (so body sizes sit near normal UI sizes), while
      Caveat rides small on the line (so the heading sizes stay large). */
   --text-xs: 0.875rem;
-  --text-xs--line-height: 1.35;
+  --text-xs--line-height: 1.4;
+  --text-xs--font-weight: 500;
   --text-sm: 0.9375rem;
-  --text-sm--line-height: 1.4;
+  --text-sm--line-height: 1.45;
+  --text-sm--font-weight: 500;
   --text-base: 1.0625rem;
   --text-base--line-height: 1.5;
   --text-lg: 1.1875rem;
   --text-lg--line-height: 1.45;
-  --text-xl: 1.5rem;
+  --text-xl: 1.375rem;
   --text-xl--line-height: 1.3;
-  --text-2xl: 1.875rem;
+  --text-2xl: 1.625rem;
   --text-2xl--line-height: 1.2;
-  --text-3xl: 2.375rem;
+  --text-3xl: 2rem;
   --text-3xl--line-height: 1.15;
-  --text-4xl: 3rem;
+  --text-4xl: 2.5rem;
   --text-4xl--line-height: 1.1;
-  --text-5xl: 3.75rem;
+  --text-5xl: 3.125rem;
   --text-5xl--line-height: 1.05;
 }
 
@@ -188,7 +166,7 @@ body,
 body {
   margin: 0;
   color: var(--ink);
-  font-family: var(--font-hand);
+  font-family: var(--font-body);
   font-size: 1.0625rem;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -387,7 +365,7 @@ body {
     border-bottom: 1.5px dotted color-mix(in srgb, var(--ink) 34%, transparent);
     padding: 0.3rem 0.15rem 0.2rem;
     color: var(--ink);
-    font-family: var(--font-hand);
+    font-family: var(--font-body);
     font-size: var(--text-base);
     transition: border-color 0.15s ease, background-color 0.15s ease;
   }
@@ -484,6 +462,13 @@ body {
     box-shadow: 0 6px 14px -6px rgb(0 0 0 / 0.5);
     pointer-events: none;
   }
+}
+
+/* One family throughout, so headings lean on the weight axis to stand apart.
+   Sets only font-weight — the family still comes from Tailwind's utility. */
+.font-display {
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 /* ---------------------------------------------------------------- motion */
