@@ -19,8 +19,8 @@ export default defineConfig({
         name: 'My Revision Diary',
         short_name: 'Diary',
         description: 'A handwritten diary that remembers when to revise',
-        theme_color: '#cdbb9c',
-        background_color: '#cdbb9c',
+        theme_color: '#0f0d16',
+        background_color: '#0f0d16',
         display: 'standalone',
         start_url: '/',
         icons: [
